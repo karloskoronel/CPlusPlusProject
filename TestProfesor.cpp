@@ -1,11 +1,7 @@
 #include<iostream>
 #include<conio.h>
 using namespace std;
-/*
-int
-bool
-double
-*/
+
 
 struct fecha {
 	int d, m, a;
@@ -91,6 +87,20 @@ void insertarDI_ND(nodoD*& I, nodoD*& D, LCliente cliente, LParqueador parqueado
 	}
 }
 
+// insertar en una lista simple
+void insertar_N(nodo*& ini, LRegistro_parqueo registro) {
+	nodo* aux = new nodo;
+	aux->registro = registro;
+	aux->puntero = NULL;
+	if (ini == NULL) ini = aux;
+	else {
+		aux->puntero = ini;
+		ini = aux;
+	}
+}
+
+
+
 void insertarCliente(LCliente& dato) {//para pedir los datos del cliente en consola
 	cout << "*DATOS DEL CLIENTE*" << endl;
 	cout << "Nombres : "; fflush(stdin); gets_s(dato.nombres);
@@ -101,6 +111,7 @@ void insertarCliente(LCliente& dato) {//para pedir los datos del cliente en cons
 	cout << "Anio:"; cin >> dato.edad.a;
 	cout << endl;
 }
+
 void insertarParqueador(LParqueador& dato) {//insertarParqueador(Unparqueador)
 	cout << "*DATOS DEL PARQUEADOR*" << endl;
 	cout << "Nombres : "; fflush(stdin); gets_s(dato.nombres);
@@ -111,6 +122,7 @@ void insertarParqueador(LParqueador& dato) {//insertarParqueador(Unparqueador)
 	cout << "Anio:"; cin >> dato.edad.a;
 	cout << endl;
 }
+
 void insertarVehiculo(LVehiculo& dato) {
 	cout << "*DATOS DEL VEHICULO*" << endl;
 	cout << "TIPO DE VEHICULO" << endl;
@@ -166,6 +178,7 @@ void insertarVehiculo(LVehiculo& dato) {
 		dato.ubicacion = contD;
 	}
 }
+
 void insertarRegistro(LRegistro_parqueo& registro, LCliente cliente, LParqueador parqueador, LVehiculo vehiculo) {
 	registro.elcliente = cliente;//LCliente charles    insertarRegistro(dummar,charles,.....) 
 	registro.elparqueador = parqueador;
@@ -197,14 +210,58 @@ void insertarRegistro(LRegistro_parqueo& registro, LCliente cliente, LParqueador
 	cout << "Minutos : "; cin >> registro.min_f;
 }
 
-//void main() {
-//	LCliente datoCliente; 5
-//	insertarCliente(datoCliente); copiar 5 y cambias por 8
-//		datoCliente 8
-//
-//	insertarDI_ND(I, D, par1, par2, par3);
-//
-//
-//
-//	_getch();
-//}
+
+
+
+void registrarParqueo() {
+	LCliente cliente;
+	insertarCliente(cliente);
+	LParqueador parqueador;
+	insertarParqueador(parqueador);
+	LVehiculo vehiculo;
+	insertarVehiculo(vehiculo);
+
+	insertarDI_ND(I, D, cliente, parqueador, vehiculo);
+
+	LRegistro_parqueo parqueo;
+	insertarRegistro(parqueo, cliente, parqueador, vehiculo);
+}
+
+void calcularRecepcionado() {}
+
+void separarListas() {}
+
+void gestionar() {
+	int opcion = 0;
+	do {
+		
+		cout << endl;
+		cout << "* OPERACIONES DE PARQUEO *" << endl;
+		cout << "--------------------------" << endl;
+		cout << "[1] : INGRESAR PARQUEO" << endl;
+		cout << "[2] : CALCULAR RECEPCIONADO" << endl;
+		cout << "[3] : SEPARAR LISTAS" << endl;
+		cout << "[0] : SALIR" << endl;
+		do {
+			cout << "INGRESAR SELECCION : "; cin >> opcion;
+		} while (!(0 <= opcion && opcion <= 3));
+
+		switch (opcion) {
+		case 1:	registrarParqueo(); break;
+		case 2:	calcularRecepcionado(); break;
+		case 3:	separarListas(); break;
+		}
+	} while (!(opcion == 0));
+
+}
+
+
+
+
+void main() {
+	
+	gestionar();
+
+
+	_getch();
+}
