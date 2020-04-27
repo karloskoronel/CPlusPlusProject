@@ -8,7 +8,7 @@ using namespace std;
 int entero;
 int* apuntador;
 
-int main() {
+//int main() {
 
 	/*entero;
 
@@ -41,16 +41,16 @@ int main() {
 */
 
 
-	struct tm newtime;
+	/*struct tm newtime;
 	time_t now = time(0);
 	localtime_s(&newtime, &now);
 	int Month = 1 + newtime.tm_mon;
 	cout << newtime.tm_year << endl;
 	cout << newtime.tm_mon << endl;
-	cout << newtime.tm_mday << endl;
+	cout << newtime.tm_mday << endl;*/
 
-	_getch();
+	/*_getch();
 
 	
 
-}
+}*/

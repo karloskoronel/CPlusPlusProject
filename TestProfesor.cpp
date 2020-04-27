@@ -213,6 +213,7 @@ void insertarVehiculo(LVehiculo& dato) {
 		dato.ubicacion = contD;
 	}
 }
+
 void insertarRegistro(LRegistro_parqueo& registro, LCliente cliente, LParqueador parqueador, LVehiculo vehiculo) {
 	registro.elcliente = cliente;//LCliente charles    insertarRegistro(dummar,charles,.....) 
 	registro.elparqueador = parqueador;
@@ -223,10 +224,10 @@ void insertarRegistro(LRegistro_parqueo& registro, LCliente cliente, LParqueador
 	cout << "Vehiculo : ";
 	switch (registro.elvehiculo.tipo)
 	{
-	case 1:cout << "Camion con remolque" << endl;
-	case 2:cout << "Camion sin remolque" << endl;
-	case 3:cout << "Auto" << endl;
-	case 4:cout << "Bicicleta" << endl;
+	case 1:cout << "Camion con remolque" << endl; break;
+	case 2:cout << "Camion sin remolque" << endl; break;
+	case 3:cout << "Auto" << endl; break;
+	case 4:cout << "Bicicleta" << endl; break;
 	}
 	cout << "FECHA DE REGISTRO" << endl;
 	cout << "INICIO DE REGISTRO" << endl;
@@ -362,8 +363,8 @@ int edadActual(fecha fnac) {
 bool existeDNI(NPersona* p,char dni[]) {
 	bool existe = false;
 	NPersona* r = p;
-	if (P == NULL) {
-		return false;
+	if (r == NULL) {
+		existe = false;
 	}
 	else {
 		while (r != NULL) {
@@ -371,26 +372,32 @@ bool existeDNI(NPersona* p,char dni[]) {
 				existe = true;
 				break;
 			}
+			r = r->next;
 		}
 	}
+
 	return existe;
 }
 
-void insertar_P(NPersona*& p, char nombres[], char dnis[], fecha fn) {
+void insertar_P(NPersona*& P, char nombres[], char dnis[], fecha fn) {
+	//cout << "insertando dni: "<<dnis << endl;
 	NPersona* aux = new NPersona;
 	strcpy_s(aux->nombres, nombres);
 	strcpy_s(aux->dni, dnis);
 	aux->fnac = fn;
+	//cout << "calculando edad... " << endl;
 	aux->edad = edadActual(fn);
 	aux->next = NULL;
 	if (P == NULL) {
+		//cout << "insertando primer nodo... " << endl;
 		P = aux;
 	}
 	else {
-		if (!existeDNI(p, dnis)) {
+		if (!existeDNI(P, dnis)) {
+			//cout << "se inserta nodo siguiente... " << endl;
 			// se inserta el nuevo valor al inicio de la lista.
-			aux->next = p;
-			p = aux;
+			aux->next = P;
+			P = aux;
 		}
 	}
 }
@@ -473,7 +480,18 @@ void insertar_P3(NPersona*& L, char nombres[], char dnis[], fecha fn) {
 			}
 		}
 		if (!insertado) {
-			Nactual->next = aux;
+			//Nactual debe apuntar al ultimo nodo disponible.
+			//el valor que debemos insertar puede ser mayor o menor que la edad de Nactual
+			// si es mayor no va a entrar aqui porque ya deberia haberse insertado antes (insertado = true)
+			// a no ser que sea el segundo nodo a ingresarse y se colocara al inicio de la lista
+			// si es menor entonces se debe insertar en Nactual->next
+			if (aux->edad > Nactual->edad) {
+				aux->next = L;
+				L = aux;
+			}
+			else {
+				Nactual->next = aux;
+			}
 		}
 	}
 }
@@ -497,24 +515,30 @@ NPersona* crearListaPersonaOrdenada(NPersona* P) {
 
 
 void crearListaPersonas(nodoD*& I, nodoD*& D) {
+	//cout << "entramos a crearListaPersonas" << endl;
+	P = NULL;
 	nodoD* aux = I;
+	int contador = 0;
 	while (aux != NULL) {
 		char nombre[200], dni[200]; fecha fn;
 		
 		// datos de cliente
-		strcpy(nombre, aux->cliente.nombres);
-		strcpy(dni, aux->cliente.dni);
+		strcpy_s(nombre, aux->cliente.nombres);
+		strcpy_s(dni, aux->cliente.dni);
 		fn = aux->cliente.edad;
 		insertar_P(P, nombre, dni, fn);
 
 		// datos de parqueador
-		strcpy(nombre, aux->parqueador.nombres);
-		strcpy(dni, aux->parqueador.dni);
+		strcpy_s(nombre, aux->parqueador.nombres);
+		strcpy_s(dni, aux->parqueador.dni);
 		fn = aux->parqueador.edad;
 		insertar_P(P, nombre, dni, fn);
 
 		aux = aux->der;
+		/*contador++;
+		cout << contador << endl;*/
 	}
+	//cout << "terminamos de crearListaPersonas" << endl;
 }
 
 void imprimirListaPersonas(NPersona* L) {
