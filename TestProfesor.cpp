@@ -334,6 +334,7 @@ void registrarParqueo() {
 
 	LRegistro_parqueo parqueo;
 	insertarRegistro(parqueo, cliente, parqueador, vehiculo);
+	insertar_N(Ini, parqueo);
 }
 
 void calcularRecepcionado() {
