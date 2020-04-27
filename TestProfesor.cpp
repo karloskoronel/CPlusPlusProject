@@ -328,18 +328,21 @@ void consultaRecaudadoTotalVehiculos(fecha fini, fecha ffin) {
 
 /* ------------ FUNCIONES PARA EL TERCER PROBLEMA - separar personas a una lista simple en orden descendente ----------------- */
 
-struct LPersona {
+struct NPersona {
 	char nombres[200], dni[200];
 	fecha fnac; int edad;
-	LPersona* next;
+	NPersona* next;
 };
 
  // cabecera del nodo personas de la lista simple
-LPersona* P;
+NPersona* P;
 
 
+// funciones para crear una nueva lista con todas las personas
+// que estan registradas en la lista doble.
 int edadActual(fecha fnac) {
 	// esta funcion calcula la edad hasta el dia de hoy.
+	// Obtener la fecha del sistema.
 	struct tm newtime;
 	time_t now = time(0);
 	localtime_s(&newtime, &now);
@@ -356,13 +359,181 @@ int edadActual(fecha fnac) {
 	return edad;
 }
 
-void insertar(LPersona*& p, char nombres[], char dnis[], fecha fn) {
+bool existeDNI(NPersona* p,char dni[]) {
+	bool existe = false;
+	NPersona* r = p;
+	if (P == NULL) {
+		return false;
+	}
+	else {
+		while (r != NULL) {
+			if (strcmp(r->dni, dni) == 0) {
+				existe = true;
+				break;
+			}
+		}
+	}
+	return existe;
+}
 
+void insertar_P(NPersona*& p, char nombres[], char dnis[], fecha fn) {
+	NPersona* aux = new NPersona;
+	strcpy_s(aux->nombres, nombres);
+	strcpy_s(aux->dni, dnis);
+	aux->fnac = fn;
+	aux->edad = edadActual(fn);
+	aux->next = NULL;
+	if (P == NULL) {
+		P = aux;
+	}
+	else {
+		if (!existeDNI(p, dnis)) {
+			// se inserta el nuevo valor al inicio de la lista.
+			aux->next = p;
+			p = aux;
+		}
+	}
+}
+
+
+// funciones para calcular el promedio de edad y la edad que mas se repite
+// *no funciona si hay dos edades que mas se repiten.
+double edadPromedio(NPersona* p) {
+	NPersona* aux = p;
+	double sumaEdad = 0;
+	int count = 0;
+	if (aux != NULL) {
+		while (aux != NULL) {
+			sumaEdad += aux->edad;
+			count++;
+			aux = aux->next;
+		}
+	}
+	if (count > 0) return sumaEdad / count;
+	return sumaEdad;
+}
+
+int frecuenciaEdad(NPersona* p, int edad) {
+	NPersona* aux = p;
+	int count = 0;
+	if (aux != NULL) {
+		while (aux != NULL) {
+			if (aux->edad == edad)
+				count++;
+			aux = aux->next;
+		}
+	}
+	return count;
+}
+
+int mayorFrecuencia(NPersona* p) {
+	NPersona* aux = p;
+	int edad = 0;
+	int frecuencia = 0;
+	if (aux != NULL) {
+		while (aux != NULL) {
+			if (frecuenciaEdad(p, aux->edad) > frecuencia)
+				edad = aux->edad;
+			aux = aux->next;
+		}
+	}
+	return edad;
 }
 
 
 
 
+// funciones para crear la nueva lista ordenada de personas
+void insertar_P3(NPersona*& L, char nombres[], char dnis[], fecha fn) {
+	NPersona* aux = new NPersona;
+	strcpy_s(aux->nombres, nombres);
+	strcpy_s(aux->dni, dnis);
+	aux->fnac = fn;
+	aux->edad = edadActual(fn);
+	aux->next = NULL;
+	
+	if (L == NULL) {
+		L = aux;
+	}
+	else {
+		// se crean dos punteros para que hagan el recorrido
+		NPersona* Nactual = L;
+		NPersona* Nsiguiente = Nactual->next;
+		bool insertado = false;
+		while (Nsiguiente != NULL && !insertado) {
+			// se verifica si el orden para ingresar el nuevo elemento
+			if ( Nsiguiente->edad < aux->edad && aux->edad <= Nactual->edad) {
+				Nactual->next = aux;
+				aux->next = Nsiguiente;
+				insertado = true;
+			}
+			else {
+				Nactual = Nactual->next;
+				Nsiguiente = Nsiguiente->next;
+			}
+		}
+		if (!insertado) {
+			Nactual->next = aux;
+		}
+	}
+}
+
+NPersona* crearListaPersonaOrdenada(NPersona* P) {
+	
+	NPersona* L = NULL;
+	NPersona* aux = P;
+	double edadProm = edadPromedio(aux);
+	int mayFrec = mayorFrecuencia(aux);
+	while (aux != NULL) {
+		if (aux->edad < edadProm && aux->edad != mayFrec) {
+			insertar_P3(L, aux->nombres, aux->dni, aux->fnac);
+		}
+
+		aux = aux->next;
+	}
+
+	return L;
+}
+
+
+void crearListaPersonas(nodoD*& I, nodoD*& D) {
+	nodoD* aux = I;
+	while (aux != NULL) {
+		char nombre[200], dni[200]; fecha fn;
+		
+		// datos de cliente
+		strcpy(nombre, aux->cliente.nombres);
+		strcpy(dni, aux->cliente.dni);
+		fn = aux->cliente.edad;
+		insertar_P(P, nombre, dni, fn);
+
+		// datos de parqueador
+		strcpy(nombre, aux->parqueador.nombres);
+		strcpy(dni, aux->parqueador.dni);
+		fn = aux->parqueador.edad;
+		insertar_P(P, nombre, dni, fn);
+
+		aux = aux->der;
+	}
+}
+
+void imprimirListaPersonas(NPersona* L) {
+	NPersona* aux = L;
+	cout << "*LISTA DE PERSONAS*" << endl;
+	cout << "*-----------------*" << endl;
+	while (aux != NULL) {
+		cout << "*DNI: *" <<aux->dni<< endl;
+		cout << "*NOMBRES: *" << aux->nombres << endl;
+		cout << "*NACIMIENTO: *" << aux->fnac.d <<"-"<< aux->fnac.m << "-" << aux->fnac.a << endl;
+		cout << "*EDAD: *" << aux->edad << endl;
+		cout << endl;
+
+		aux = aux->next;
+	}
+}
+
+
+// ejecucion del problema 1
 void registrarParqueo() {
 	LCliente cliente;
 	insertarCliente(cliente);
@@ -378,6 +549,7 @@ void registrarParqueo() {
 	insertar_N(Ini, parqueo);
 }
 
+// ejecucion del problema 2
 void calcularRecepcionado() {
 	fecha fi, ff;
 	cout << "*DATOS DE CONSULTA*" << endl;
@@ -396,7 +568,12 @@ void calcularRecepcionado() {
 	consultaRecaudadoTotalVehiculos(fi, ff);
 }
 
-void separarListas() {}
+// ejecucion del problema 3
+void separarListas() {
+	crearListaPersonas(I, D);
+	P = crearListaPersonaOrdenada(P);
+	imprimirListaPersonas(P);
+}
 
 void gestionar() {
 	int opcion = 0;
@@ -422,9 +599,9 @@ void gestionar() {
 
 }
 
-//void main() {
-//	
-//	gestionar();
-//	_getch();
-//
-//}
+void main() {
+	
+	gestionar();
+	_getch();
+
+}
