@@ -106,8 +106,8 @@ nodo* buscarRegistroParqueo(nodo*& punteroBusqueda, char placa[], char serie[]) 
 		bool siguienteEncontrado = false;
 		while (punteroBusqueda != NULL && !siguienteEncontrado) {
 			char placaVehiculo[200], serieVehiculo[200];
-			strcpy(placaVehiculo, punteroBusqueda->registro.elvehiculo.placa);
-			strcpy(serieVehiculo, punteroBusqueda->registro.elvehiculo.serie);
+			strcpy_s(placaVehiculo, punteroBusqueda->registro.elvehiculo.placa);
+			strcpy_s(serieVehiculo, punteroBusqueda->registro.elvehiculo.serie);
 			if (!(strcmp(placa,"No tiene")==0 && strcmp(serie,"No tiene")==0)) {
 				
 				if (strcmp(placaVehiculo, placa) == 0 || strcmp(serieVehiculo, serie) == 0) {
@@ -130,9 +130,85 @@ nodo* buscarRegistroParqueo(nodo*& punteroBusqueda, char placa[], char serie[]) 
 	return punteroBusqueda;
 }
 
-double retornaRecaudadoVehiculo(fecha fini, fecha, ffin, ) {
+// funcion auxiliar que convierte una fecha a un numero aaaammdd
+int fechaANumero(fecha f) {
+	int numero = f.a * 10000 + (100 + f.m) * 100 + (100 + f.d) - 10100;
+	return numero;
+}
+
+int restarFechas(fecha fechaMayor, fecha fechaMenor) {
+	//  suponemos que todos los años tienen 360 dias
+	// suponemos que todos los meses tienen 30 dias
+	int dias = (fechaMayor.a - fechaMenor.a) * 360;
+	dias = dias + (fechaMayor.m - fechaMenor.m) * 30;
+	dias = dias + (fechaMayor.d - fechaMenor.d);
+
+	return dias;
+}
+
+double precioTipoVehiculo(int tipo) {
+	// Precio por hora en cada Zona(en soles) :
+		// zonaA: 10 --- zonaB: 8 --- zonaC: 5 --- zonaD: 3
+	double precio = 0.0;
+	switch (tipo) {
+	case 1: precio = 10.0; break;
+	case 2: precio = 8.0; break;
+	case 3:precio = 5.0; break;
+	case 4:precio = 3.0; break;
+	}
+	return precio;
+}
+
+void consultaRecaudadoTotalVehiculos(fecha fini, fecha ffin ) {
+	double monto = 0;
+	int inicioBusqueda = fechaANumero(fini);
+	int finBusqueda = fechaANumero(ffin);
+
+	nodo* recorreLista = Ini;
+	while (recorreLista != NULL) {
+
+		int fechaIni = fechaANumero(recorreLista->registro.parqueoi);
+		int fechaFin = fechaANumero(recorreLista->registro.parqueof);
+		double parcial = 0;
+		double horas = 0.0;
+		if ((inicioBusqueda <= fechaIni && fechaIni <= finBusqueda) || (inicioBusqueda <= fechaFin && fechaFin <= finBusqueda))
+		{
+			
+			if (fechaIni < inicioBusqueda && fechaFin <= finBusqueda) {
+				int dias = restarFechas(recorreLista->registro.parqueof, fini)-1;
+				horas = dias * 24 + recorreLista->registro.hora_f + (recorreLista->registro.min_f / 60);
+				
+			}
+
+			if ( inicioBusqueda <= fechaIni && finBusqueda < fechaFin ) {
+				int dias = restarFechas(ffin, recorreLista->registro.parqueoi) - 1;
+				horas = dias * 24 + (24 - recorreLista->registro.hora_i + (recorreLista->registro.min_i / 60));
+			}
+
+
+			if (inicioBusqueda <= fechaIni && fechaFin <= finBusqueda) {
+				int dias = restarFechas(recorreLista->registro.parqueof, recorreLista->registro.parqueoi) - 1;
+				horas = dias * 24 + (24 - recorreLista->registro.hora_i + (recorreLista->registro.min_i / 60)) + (recorreLista->registro.hora_f + (recorreLista->registro.min_f / 60));
+			}
+
+			parcial = horas * precioTipoVehiculo(recorreLista->registro.elvehiculo.tipo);
+
+			monto = monto + parcial;
+		}
+
+		cout << "Tipo vehiculo : " << recorreLista->registro.elvehiculo.tipo<<" \t Zona: "<<recorreLista->registro.elvehiculo.zonaparqueo<<endl;
+		cout << "Horas : " << horas << " \t Precio Hora: " << precioTipoVehiculo(recorreLista->registro.elvehiculo.tipo) << endl;
+		cout << "Monto Parqueo : " << parcial << endl;
+
+		recorreLista = recorreLista->puntero;
+	}
+
+	cout <<endl<< "Monto Total : " << monto << endl;
 
 }
+
+
+
 
 void insertarCliente(LCliente& dato) {//para pedir los datos del cliente en consola
 	cout << "*DATOS DEL CLIENTE*" << endl;
@@ -260,7 +336,24 @@ void registrarParqueo() {
 	insertarRegistro(parqueo, cliente, parqueador, vehiculo);
 }
 
-void calcularRecepcionado() {}
+void calcularRecepcionado() {
+	fecha fi, ff;
+	cout << "*DATOS DE CONSULTA*" << endl;
+	cout << "*-----------------*" << endl;
+	cout << "Fecha de inicio de reporte" << endl;
+	cout << "Dia:"; cin >> fi.d;
+	cout << "Mes:"; cin >> fi.m;
+	cout << "Anio:"; cin >> fi.a;
+	cout << endl;
+	cout << "Fecha de fin de reporte" << endl;
+	cout << "Dia:"; cin >> ff.d;
+	cout << "Mes:"; cin >> ff.m;
+	cout << "Anio:"; cin >> ff.a;
+	cout << endl;
+
+	consultaRecaudadoTotalVehiculos(fi, ff);
+}
+
 
 void separarListas() {}
 
