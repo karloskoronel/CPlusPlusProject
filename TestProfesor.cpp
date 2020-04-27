@@ -99,12 +99,45 @@ void insertar_N(nodo*& ini, LRegistro_parqueo registro) {
 	}
 }
 
+// buscar por placa o serie de vehiculo
+nodo* buscarRegistroParqueo(nodo*& punteroBusqueda, char placa[], char serie[]) {
+	if (punteroBusqueda != NULL)
+	 {
+		bool siguienteEncontrado = false;
+		while (punteroBusqueda != NULL && !siguienteEncontrado) {
+			char placaVehiculo[200], serieVehiculo[200];
+			strcpy(placaVehiculo, punteroBusqueda->registro.elvehiculo.placa);
+			strcpy(serieVehiculo, punteroBusqueda->registro.elvehiculo.serie);
+			if (!(strcmp(placa,"No tiene")==0 && strcmp(serie,"No tiene")==0)) {
+				
+				if (strcmp(placaVehiculo, placa) == 0 || strcmp(serieVehiculo, serie) == 0) {
+					siguienteEncontrado = true;
+				}
+				else {
+					punteroBusqueda = punteroBusqueda->puntero;
+				}
+			}
+			else {
+				if (strcmp(placaVehiculo, "No tiene") == 0 && strcmp(serieVehiculo, "No tiene") == 0) {
+					siguienteEncontrado = true;
+				}
+				else {
+					punteroBusqueda = punteroBusqueda->puntero;
+				}
+			}
+		}
+	}
+	return punteroBusqueda;
+}
 
+double retornaRecaudadoVehiculo(fecha fini, fecha, ffin, ) {
+
+}
 
 void insertarCliente(LCliente& dato) {//para pedir los datos del cliente en consola
 	cout << "*DATOS DEL CLIENTE*" << endl;
-	cout << "Nombres : "; fflush(stdin); gets_s(dato.nombres);
-	cout << "DNI : "; fflush(stdin); gets_s(dato.dni);
+	cout << "Nombres : "; while (fgetc(stdin) != '\n'); gets_s(dato.nombres);
+	cout << "DNI : "; ; gets_s(dato.dni);
 	cout << "Fecha de nacimiento" << endl;
 	cout << "Dia:"; cin >> dato.edad.d;
 	cout << "Mes:"; cin >> dato.edad.m;
@@ -114,8 +147,8 @@ void insertarCliente(LCliente& dato) {//para pedir los datos del cliente en cons
 
 void insertarParqueador(LParqueador& dato) {//insertarParqueador(Unparqueador)
 	cout << "*DATOS DEL PARQUEADOR*" << endl;
-	cout << "Nombres : "; fflush(stdin); gets_s(dato.nombres);
-	cout << "DNI : "; fflush(stdin); gets_s(dato.dni);
+	cout << "Nombres : "; while (fgetc(stdin) != '\n'); gets_s(dato.nombres);
+	cout << "DNI : ";  gets_s(dato.dni);
 	cout << "Fecha de nacimiento" << endl;
 	cout << "Dia:"; cin >> dato.edad.d;
 	cout << "Mes:"; cin >> dato.edad.m;
@@ -133,7 +166,7 @@ void insertarVehiculo(LVehiculo& dato) {
 	} while (!(0 < dato.tipo && dato.tipo <= 4));
 
 	if (dato.tipo != 4) {
-		cout << "Placa : "; fflush(stdin); gets_s(dato.placa);
+		cout << "Placa : "; while (fgetc(stdin) != '\n'); gets_s(dato.placa);
 		cout << "Serie : "; fflush(stdin); gets_s(dato.serie);
 		cout << "Zona de parqueo : ";
 		switch (dato.tipo) {
@@ -261,7 +294,6 @@ void gestionar() {
 void main() {
 	
 	gestionar();
-
-
 	_getch();
+
 }
