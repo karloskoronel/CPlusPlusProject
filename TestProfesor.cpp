@@ -1,5 +1,8 @@
 #include<iostream>
 #include<conio.h>
+#include <ctime>
+#include<dos.h>
+#include<stdio.h>
 using namespace std;
 
 
@@ -87,7 +90,7 @@ void insertarDI_ND(nodoD*& I, nodoD*& D, LCliente cliente, LParqueador parqueado
 	}
 }
 
-// insertar en una lista simple
+// insertar en una lista simple de parqueo
 void insertar_N(nodo*& ini, LRegistro_parqueo registro) {
 	nodo* aux = new nodo;
 	aux->registro = registro;
@@ -128,83 +131,6 @@ nodo* buscarRegistroParqueo(nodo*& punteroBusqueda, char placa[], char serie[]) 
 		}
 	}
 	return punteroBusqueda;
-}
-
-// funcion auxiliar que convierte una fecha a un numero aaaammdd
-int fechaANumero(fecha f) {
-	int numero = f.a * 10000 + (100 + f.m) * 100 + (100 + f.d) - 10100;
-	return numero;
-}
-
-int restarFechas(fecha fechaMayor, fecha fechaMenor) {
-	//  suponemos que todos los años tienen 360 dias
-	// suponemos que todos los meses tienen 30 dias
-	int dias = (fechaMayor.a - fechaMenor.a) * 360;
-	dias = dias + (fechaMayor.m - fechaMenor.m) * 30;
-	dias = dias + (fechaMayor.d - fechaMenor.d);
-
-	return dias;
-}
-
-double precioTipoVehiculo(int tipo) {
-	// Precio por hora en cada Zona(en soles) :
-		// zonaA: 10 --- zonaB: 8 --- zonaC: 5 --- zonaD: 3
-	double precio = 0.0;
-	switch (tipo) {
-	case 1: precio = 10.0; break;
-	case 2: precio = 8.0; break;
-	case 3:precio = 5.0; break;
-	case 4:precio = 3.0; break;
-	}
-	return precio;
-}
-
-void consultaRecaudadoTotalVehiculos(fecha fini, fecha ffin ) {
-	double monto = 0;
-	int inicioBusqueda = fechaANumero(fini);
-	int finBusqueda = fechaANumero(ffin);
-
-	nodo* recorreLista = Ini;
-	while (recorreLista != NULL) {
-
-		int fechaIni = fechaANumero(recorreLista->registro.parqueoi);
-		int fechaFin = fechaANumero(recorreLista->registro.parqueof);
-		double parcial = 0;
-		double horas = 0.0;
-		if ((inicioBusqueda <= fechaIni && fechaIni <= finBusqueda) || (inicioBusqueda <= fechaFin && fechaFin <= finBusqueda))
-		{
-			
-			if (fechaIni < inicioBusqueda && fechaFin <= finBusqueda) {
-				int dias = restarFechas(recorreLista->registro.parqueof, fini)-1;
-				horas = dias * 24 + recorreLista->registro.hora_f + (recorreLista->registro.min_f / 60);
-				
-			}
-
-			if ( inicioBusqueda <= fechaIni && finBusqueda < fechaFin ) {
-				int dias = restarFechas(ffin, recorreLista->registro.parqueoi) - 1;
-				horas = dias * 24 + (24 - recorreLista->registro.hora_i + (recorreLista->registro.min_i / 60));
-			}
-
-
-			if (inicioBusqueda <= fechaIni && fechaFin <= finBusqueda) {
-				int dias = restarFechas(recorreLista->registro.parqueof, recorreLista->registro.parqueoi) - 1;
-				horas = dias * 24 + (24 - recorreLista->registro.hora_i + (recorreLista->registro.min_i / 60)) + (recorreLista->registro.hora_f + (recorreLista->registro.min_f / 60));
-			}
-
-			parcial = horas * precioTipoVehiculo(recorreLista->registro.elvehiculo.tipo);
-
-			monto = monto + parcial;
-		}
-
-		cout << "Tipo vehiculo : " << recorreLista->registro.elvehiculo.tipo<<" \t Zona: "<<recorreLista->registro.elvehiculo.zonaparqueo<<endl;
-		cout << "Horas : " << horas << " \t Precio Hora: " << precioTipoVehiculo(recorreLista->registro.elvehiculo.tipo) << endl;
-		cout << "Monto Parqueo : " << parcial << endl;
-
-		recorreLista = recorreLista->puntero;
-	}
-
-	cout <<endl<< "Monto Total : " << monto << endl;
-
 }
 
 
@@ -287,7 +213,6 @@ void insertarVehiculo(LVehiculo& dato) {
 		dato.ubicacion = contD;
 	}
 }
-
 void insertarRegistro(LRegistro_parqueo& registro, LCliente cliente, LParqueador parqueador, LVehiculo vehiculo) {
 	registro.elcliente = cliente;//LCliente charles    insertarRegistro(dummar,charles,.....) 
 	registro.elparqueador = parqueador;
@@ -317,6 +242,122 @@ void insertarRegistro(LRegistro_parqueo& registro, LCliente cliente, LParqueador
 	cout << "Anio : "; cin >> registro.parqueof.a;
 	cout << "Hora : "; cin >> registro.hora_f;
 	cout << "Minutos : "; cin >> registro.min_f;
+}
+
+
+
+/* ------------ FUNCIONES PARA EL SEGUNDO PROBLEMA - calcular recaudado por fechas ----------------- */
+
+// funcion auxiliar que convierte una fecha a un numero aaaammdd
+int fechaANumero(fecha f) {
+	int numero = f.a * 10000 + (100 + f.m) * 100 + (100 + f.d) - 10100;
+	return numero;
+}
+
+int restarFechas(fecha fechaMayor, fecha fechaMenor) {
+	//  suponemos que todos los años tienen 360 dias
+	// suponemos que todos los meses tienen 30 dias
+	int dias = (fechaMayor.a - fechaMenor.a) * 360;
+	dias = dias + (fechaMayor.m - fechaMenor.m) * 30;
+	dias = dias + (fechaMayor.d - fechaMenor.d);
+
+	return dias;
+}
+
+double precioTipoVehiculo(int tipo) {
+	// Precio por hora en cada Zona(en soles) :
+		// zonaA: 10 --- zonaB: 8 --- zonaC: 5 --- zonaD: 3
+	double precio = 0.0;
+	switch (tipo) {
+	case 1: precio = 10.0; break;
+	case 2: precio = 8.0; break;
+	case 3:precio = 5.0; break;
+	case 4:precio = 3.0; break;
+	}
+	return precio;
+}
+
+void consultaRecaudadoTotalVehiculos(fecha fini, fecha ffin) {
+	double monto = 0;
+	int inicioBusqueda = fechaANumero(fini);
+	int finBusqueda = fechaANumero(ffin);
+
+	nodo* recorreLista = Ini;
+	while (recorreLista != NULL) {
+
+		int fechaIni = fechaANumero(recorreLista->registro.parqueoi);
+		int fechaFin = fechaANumero(recorreLista->registro.parqueof);
+		double parcial = 0;
+		double horas = 0.0;
+		if ((inicioBusqueda <= fechaIni && fechaIni <= finBusqueda) || (inicioBusqueda <= fechaFin && fechaFin <= finBusqueda))
+		{
+
+			if (fechaIni < inicioBusqueda && fechaFin <= finBusqueda) {
+				int dias = restarFechas(recorreLista->registro.parqueof, fini) - 1;
+				horas = dias * 24 + recorreLista->registro.hora_f + (recorreLista->registro.min_f / 60);
+
+			}
+
+			if (inicioBusqueda <= fechaIni && finBusqueda < fechaFin) {
+				int dias = restarFechas(ffin, recorreLista->registro.parqueoi) - 1;
+				horas = dias * 24 + (24 - recorreLista->registro.hora_i + (recorreLista->registro.min_i / 60));
+			}
+
+
+			if (inicioBusqueda <= fechaIni && fechaFin <= finBusqueda) {
+				int dias = restarFechas(recorreLista->registro.parqueof, recorreLista->registro.parqueoi) - 1;
+				horas = dias * 24 + (24 - recorreLista->registro.hora_i + (recorreLista->registro.min_i / 60)) + (recorreLista->registro.hora_f + (recorreLista->registro.min_f / 60));
+			}
+
+			parcial = horas * precioTipoVehiculo(recorreLista->registro.elvehiculo.tipo);
+
+			monto = monto + parcial;
+		}
+
+		cout << "Tipo vehiculo : " << recorreLista->registro.elvehiculo.tipo << " \t Zona: " << recorreLista->registro.elvehiculo.zonaparqueo << endl;
+		cout << "Horas : " << horas << " \t Precio Hora: " << precioTipoVehiculo(recorreLista->registro.elvehiculo.tipo) << endl;
+		cout << "Monto Parqueo : " << parcial << endl;
+
+		recorreLista = recorreLista->puntero;
+	}
+
+	cout << endl << "Monto Total : " << monto << endl;
+
+}
+
+
+/* ------------ FUNCIONES PARA EL TERCER PROBLEMA - separar personas a una lista simple en orden descendente ----------------- */
+
+struct LPersona {
+	char nombres[200], dni[200];
+	fecha fnac; int edad;
+	LPersona* next;
+};
+
+ // cabecera del nodo personas de la lista simple
+LPersona* P;
+
+
+int edadActual(fecha fnac) {
+	// esta funcion calcula la edad hasta el dia de hoy.
+	struct tm newtime;
+	time_t now = time(0);
+	localtime_s(&newtime, &now);
+
+	fecha fact;
+	fact.a = 1900 + newtime.tm_year;
+	fact.m = newtime.tm_mon + 1;
+	fact.d = newtime.tm_mday;
+
+	int edad = fact.a - fnac.a;
+	int enElAnioAct = fact.m * 100 + fact.d;
+	int enElAnioNac = fnac.m * 100 + fnac.d;
+	if (enElAnioAct < enElAnioNac) edad -= 1;
+	return edad;
+}
+
+void insertar(LPersona*& p, char nombres[], char dnis[], fecha fn) {
+
 }
 
 
@@ -355,7 +396,6 @@ void calcularRecepcionado() {
 	consultaRecaudadoTotalVehiculos(fi, ff);
 }
 
-
 void separarListas() {}
 
 void gestionar() {
@@ -382,12 +422,9 @@ void gestionar() {
 
 }
 
-
-
-
-void main() {
-	
-	gestionar();
-	_getch();
-
-}
+//void main() {
+//	
+//	gestionar();
+//	_getch();
+//
+//}
